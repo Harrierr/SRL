@@ -168,6 +168,7 @@ begin
       Wait(Random(25, 50));
   until (GetTickCount64() >= t);
 end;
+
 function TRSBankScreen.IsOpen(PinCheck: Boolean): Boolean; overload;
 begin
   Result := Self.IsOpen(0, PinCheck);
@@ -595,12 +596,14 @@ begin
     end;
   end;
 end;
+
 function TRSPinScreen._Find(): Boolean;
 var
   P: TPoint;
 begin
   Result := srl.FindText(p, 'Bank of RuneScape', 'UpChars07_s', 255, 0, Box(21,30,151,50));
 end;
+
 function TRSPinScreen.IsOpen(WaitTime: UInt32 = 0): Boolean;
 var
   t: UInt64;
@@ -618,7 +621,6 @@ end;
 function TRSPinScreen.EnterPin(): Boolean;
 var
   I, J, F, Start: Int32;
-  S: string;
   TSA: TStringArray = ['First', 'Now', 'Time', 'Finally'];
   T: UInt64;
   P: TPoint;
@@ -630,17 +632,18 @@ begin
     if (GetTickCount64 > T) then
       Exit(False);
   end;
+
   for Start := 1 to 4 do
   begin
     if srl.FindText(p, TSA[Start - 1], 'UpChars07_s', Box(160, 80, 350, 100)) then
       Break;
   end;
-  S := Copy(Players.GetCurrent() ^.BankPin);
+
   for J := Start to 4 do
   begin
     P := [0, 0];
-    WriteLn(j);
-    if srl.FindText(P, S[J], 'UpChars07_s', Box(37, 107, 372, 318)) then
+    if srl.FindText(P, Players.GetCurrent()^.BankPin[J], 'UpChars07_s', Box(37, 107, 372, 318)) then
+    begin
       for I := Low(FSlots) to High(FSlots) do
       begin
         if PointInBox(P, FSlots[I]) then
@@ -648,8 +651,8 @@ begin
           Mouse.Click(FSlots[I], Mouse_Left);
           Break;
         end;
-      end
-    else
+      end;
+    end else
     begin
       GetMousePos(P.X, P.Y);
       for I := Low(FSlots) to High(FSlots) do
@@ -661,6 +664,7 @@ begin
         end;
       end;
     end;
+
     T := GetTickCount64 + RandomRange(4000, 8000);
     while srl.FindText(p, TSA[J - 1], 'UpChars07_s', Box(160, 80, 350, 100)) and (CountColor(32767, 37, 107, 372, 318) <> 332) do
     begin
@@ -668,14 +672,16 @@ begin
       if (GetTickCount64 > T) then
         Exit(False);
     end;
+    Wait(RandomRange(600, 1200));
   end;
-  T := GetTickCount64 + RandomRange(4000, 8000);
+
+  T := GetTickCount64 + RandomRange(15000, 20000);
   while not BankScreen.IsOpen() do
   begin
     if ChatBox.ClickContinue then
     begin
       Inc(F);
-      if (F > 3) then
+      if (F > 2) then
         srl.Writeln('Your pin is wrong!', dtFatal);
       Self.EnterPin;
     end;
